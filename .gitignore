@@ -1,0 +1,31 @@
+# =========================
+# C++ & CLion (Backend)
+# =========================
+cmake-build-debug/
+cmake-build-release/
+.idea/
+*.exe
+*.obj
+*.pdb
+*.ilk
+*.lib
+*.dll
+
+# =========================
+# React & Vite (Frontend)
+# =========================
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.env.*
+.DS_Store
+
+# =========================
+# General Logs & OS Files
+# =========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+Thumbs.db
