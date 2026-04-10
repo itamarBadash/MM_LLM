@@ -8,6 +8,7 @@
 #include "crow/middlewares/cors.h"
 #include <nlohmann/json.hpp>
 #include <cpr/cpr.h>
+#include <fstream>
 
 // Convenience alias for nlohmann::json
 using json = nlohmann::json;
@@ -136,6 +137,50 @@ int main()
     });
 
     ////////////////////////////////////////////////////////////////////////////
+    // GET Route: /
+    // Description: Serves the React frontend's index.html file
+    ////////////////////////////////////////////////////////////////////////////
+
+    CROW_ROUTE(app, "/").methods("GET"_method)
+    ([]() {
+        std::ifstream file("dist/index.html");
+        if (!file) {
+            return crow::response(404, "File not found");
+        }
+        std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        crow::response res(200, content);
+        res.set_header("Content-Type", "text/html");
+        return res;
+    });
+
+    ////////////////////////////////////////////////////////////////////////////
+    // GET Route: /assets/<path>
+    // Description: Serves static assets from the dist/assets/ directory
+    ////////////////////////////////////////////////////////////////////////////
+
+    CROW_ROUTE(app, "/assets/<path>").methods("GET"_method)
+        ([](const crow::request&, std::string path) {
+          std::string filepath = "dist/assets/" + path;
+        std::ifstream file(filepath);
+        if (!file) {
+            return crow::response(404, "File not found");
+        }
+        std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        crow::response res(200, content);
+        // Determine Content-Type based on file extension
+        std::string ext = path.substr(path.find_last_of('.') + 1);
+        std::string content_type;
+        if (ext == "js") content_type = "text/javascript";
+        else if (ext == "css") content_type = "text/css";
+        else if (ext == "png") content_type = "image/png";
+        else if (ext == "jpg" || ext == "jpeg") content_type = "image/jpeg";
+        else if (ext == "html") content_type = "text/html";
+        else content_type = "application/octet-stream";
+        res.set_header("Content-Type", content_type);
+        return res;
+    });
+
+    ////////////////////////////////////////////////////////////////////////////
     // Server Configuration and Startup
     ////////////////////////////////////////////////////////////////////////////
 
@@ -146,3 +191,4 @@ int main()
 
     return 0;
 }
+
